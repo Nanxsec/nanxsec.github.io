@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lucas Silva — Ethical Hacker</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Syne:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0a0c0f;
+    --surface: #111418;
+    --surface2: #181c22;
+    --border: rgba(255,255,255,0.07);
+    --border2: rgba(255,255,255,0.13);
+    --accent: #00e5a0;
+    --accent2: #00b87a;
+    --text: #e8eaed;
+    --muted: #6b7280;
+    --muted2: #9ca3af;
+    --danger: #ff4757;
+    --mono: 'JetBrains Mono', monospace;
+    --sans: 'Syne', sans-serif;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* SCANLINE OVERLAY */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px);
+    pointer-events: none;
+    z-index: 999;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    background: rgba(10,12,15,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 0.5px solid var(--border);
+    padding: 0 2rem;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .nav-logo {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--accent);
+    letter-spacing: 0.08em;
+  }
+
+  .nav-logo span { color: var(--muted); }
+
+  .nav-links {
+    display: flex;
+    gap: 2rem;
+    list-style: none;
+  }
+
+  .nav-links a {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--muted2);
+    text-decoration: none;
+    letter-spacing: 0.06em;
+    transition: color 0.2s;
+  }
+
+  .nav-links a:hover { color: var(--accent); }
+
+  /* SECTIONS */
+  section {
+    padding: 6rem 2rem 4rem;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  /* HERO */
+  .hero {
+    padding-top: 9rem;
+    padding-bottom: 5rem;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .hero-tag {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .hero-tag::before {
+    content: '';
+    display: inline-block;
+    width: 24px;
+    height: 1px;
+    background: var(--accent);
+  }
+
+  .hero h1 {
+    font-size: clamp(3rem, 8vw, 6rem);
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    margin-bottom: 0.5rem;
+  }
+
+  .hero h1 .name-accent { color: var(--accent); }
+
+  .hero-subtitle {
+    font-family: var(--mono);
+    font-size: 14px;
+    color: var(--muted2);
+    margin-bottom: 2.5rem;
+    letter-spacing: 0.04em;
+  }
+
+  .hero-desc {
+    font-size: 16px;
+    color: var(--muted2);
+    max-width: 480px;
+    line-height: 1.8;
+    margin-bottom: 3rem;
+    font-weight: 400;
+  }
+
+  .hero-cta {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    padding: 10px 24px;
+    border-radius: 2px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s;
+    display: inline-block;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #000;
+    border: 1.5px solid var(--accent);
+    font-weight: 700;
+  }
+
+  .btn-primary:hover { background: var(--accent2); border-color: var(--accent2); }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--muted2);
+    border: 0.5px solid var(--border2);
+  }
+
+  .btn-ghost:hover { color: var(--accent); border-color: var(--accent); }
+
+  /* TERMINAL BLOCK */
+  .terminal {
+    background: var(--surface);
+    border: 0.5px solid var(--border2);
+    border-radius: 4px;
+    padding: 1.25rem 1.5rem;
+    font-family: var(--mono);
+    font-size: 12px;
+    margin: 3rem 0;
+    position: relative;
+  }
+
+  .terminal-bar {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 1rem;
+  }
+
+  .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+  }
+
+  .dot-red { background: #ff5f56; }
+  .dot-yellow { background: #ffbd2e; }
+  .dot-green { background: #27c93f; }
+
+  .terminal-line {
+    line-height: 2;
+    color: var(--muted2);
+  }
+
+  .terminal-line .prompt { color: var(--accent); }
+  .terminal-line .cmd { color: var(--text); }
+  .terminal-line .out { color: var(--muted); }
+  .terminal-line .ok { color: var(--accent); }
+  .terminal-line .err { color: var(--danger); }
+
+  /* SECTION HEADER */
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 3rem;
+  }
+
+  .section-num {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+  }
+
+  .section-title {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+
+  .section-line {
+    flex: 1;
+    height: 0.5px;
+    background: var(--border);
+  }
+
+  /* SKILLS GRID */
+  .skills-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1px;
+    border: 0.5px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .skill-item {
+    background: var(--surface);
+    padding: 1.25rem 1.5rem;
+    border-right: 0.5px solid var(--border);
+    border-bottom: 0.5px solid var(--border);
+    transition: background 0.2s;
+  }
+
+  .skill-item:hover { background: var(--surface2); }
+
+  .skill-icon {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+    margin-bottom: 0.5rem;
+  }
+
+  .skill-name {
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 4px;
+  }
+
+  .skill-tools {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+
+  /* PROJECTS */
+  .projects-grid {
+    display: grid;
+    gap: 1.5rem;
+  }
+
+  .project-card {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: 4px;
+    padding: 2rem;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.3s;
+  }
+
+  .project-card:hover { border-color: var(--accent); }
+
+  .project-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px;
+    height: 100%;
+    background: var(--accent);
+  }
+
+  .project-tag {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--accent);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+  }
+
+  .project-name {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.75rem;
+  }
+
+  .project-desc {
+    font-size: 14px;
+    color: var(--muted2);
+    line-height: 1.7;
+    margin-bottom: 1.25rem;
+  }
+
+  .project-badges {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .badge {
+    font-family: var(--mono);
+    font-size: 10px;
+    padding: 3px 10px;
+    border: 0.5px solid var(--border2);
+    border-radius: 2px;
+    color: var(--muted2);
+    letter-spacing: 0.06em;
+  }
+
+  /* EXPERIENCE */
+  .exp-item {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: 0 2rem;
+    padding-bottom: 2.5rem;
+    margin-bottom: 2.5rem;
+    border-bottom: 0.5px solid var(--border);
+  }
+
+  .exp-item:last-child { border-bottom: none; }
+
+  .exp-year {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    padding-top: 4px;
+    line-height: 1.8;
+  }
+
+  .exp-role {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .exp-org {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--accent);
+    margin-bottom: 8px;
+    letter-spacing: 0.04em;
+  }
+
+  .exp-desc {
+    font-size: 13px;
+    color: var(--muted2);
+    line-height: 1.7;
+  }
+
+  /* CONTACT */
+  .contact-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: 4px;
+    margin-bottom: 1px;
+    text-decoration: none;
+    transition: border-color 0.2s;
+  }
+
+  .contact-row:hover { border-color: var(--accent); }
+
+  .contact-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    width: 70px;
+    letter-spacing: 0.06em;
+  }
+
+  .contact-value {
+    font-size: 14px;
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  .contact-arrow {
+    margin-left: auto;
+    font-family: var(--mono);
+    font-size: 14px;
+    color: var(--muted);
+    transition: color 0.2s, transform 0.2s;
+  }
+
+  .contact-row:hover .contact-arrow {
+    color: var(--accent);
+    transform: translateX(4px);
+  }
+
+  /* FOOTER */
+  footer {
+    text-align: center;
+    padding: 3rem 2rem;
+    border-top: 0.5px solid var(--border);
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+  }
+
+  /* CURSOR BLINK */
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+  .cursor { animation: blink 1s step-end infinite; color: var(--accent); }
+
+  /* FADE IN */
+  @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+  .hero > * { animation: fadeUp 0.6s ease both; }
+  .hero > *:nth-child(1){ animation-delay:0.1s }
+  .hero > *:nth-child(2){ animation-delay:0.2s }
+  .hero > *:nth-child(3){ animation-delay:0.3s }
+  .hero > *:nth-child(4){ animation-delay:0.4s }
+  .hero > *:nth-child(5){ animation-delay:0.5s }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo"><span>~/</span>nanxsec</div>
+  <ul class="nav-links">
+    <li><a href="#sobre">sobre</a></li>
+    <li><a href="#skills">skills</a></li>
+    <li><a href="#projetos">projetos</a></li>
+    <li><a href="#contato">contato</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="sobre">
+  <div class="hero-tag">ethical hacker &amp; security researcher</div>
+  <h1>Lucas<br><span class="name-accent">Silva</span></h1>
+  <div class="hero-subtitle">[ nanoxsec ] &nbsp;·&nbsp; offensive security &nbsp;·&nbsp; ctf player<span class="cursor">█</span></div>
+  <p class="hero-desc">
+    Sempre estudando, aprendendo mais sobre novas vulnerabilidades e aprendendo a como corrigí-las. Estou sempre em busca de me aprimorar mais e mais e me preparar para o mercado
+  </p>
+  <div class="hero-cta">
+    <a href="#projetos" class="btn btn-primary">ver projetos</a>
+    <a href="#contato" class="btn btn-ghost">entrar em contato</a>
+  </div>
+
+  <div class="terminal">
+    <div class="terminal-bar">
+      <div class="dot dot-red"></div>
+      <div class="dot dot-yellow"></div>
+      <div class="dot dot-green"></div>
+    </div>
+    <div class="terminal-line"><span class="prompt">nanxsec@kali</span>:~$ <span class="cmd">whoami</span></div>
+    <div class="terminal-line"><span class="out">Lucas Silva — Ethical Hacker | CTF Player | Security Researcher</span></div>
+    <div class="terminal-line"><span class="prompt">nanxsec@kali</span>:~$ <span class="cmd">cat /etc/certifications</span></div>
+    <div class="terminal-line"><span class="ok">[+]</span> <span class="out">Cisco Certified — Network Infrastructure &amp; Security</span></div>
+    <div class="terminal-line"><span class="prompt">nanxsec@kali</span>:~$ <span class="cmd">ls ./projects</span></div>
+    <div class="terminal-line"><span class="ok">phantom/</span> &nbsp;&nbsp;<span class="ok">metatron/</span></div>
+    <div class="terminal-line"><span class="prompt">nanxsec@kali</span>:~$ <span class="cmd">status</span></div>
+    <div class="terminal-line"><span class="ok">[+]</span> <span class="out">available for projects &amp; consulting</span></div>
+  </div>
+</section>
+
+<!-- SKILLS -->
+<section id="skills">
+  <div class="section-header">
+    <span class="section-num">01.</span>
+    <h2 class="section-title">Ferramentas & Skills</h2>
+    <div class="section-line"></div>
+  </div>
+
+  <div class="skills-grid">
+    <div class="skill-item">
+      <div class="skill-icon">// 01</div>
+      <div class="skill-name">Sistemas Operacionais</div>
+      <div class="skill-tools">Kali Linux · Parrot OS<br>Windows · Ubuntu</div>
+    </div>
+    <div class="skill-item">
+      <div class="skill-icon">// 02</div>
+      <div class="skill-name">Exploit Frameworks</div>
+      <div class="skill-tools">Metasploit Framework<br>Exploit-DB · ExploitKit</div>
+    </div>
+    <div class="skill-item">
+      <div class="skill-icon">// 03</div>
+      <div class="skill-name">Web Pentest</div>
+      <div class="skill-tools">Burp Suite Pro · OWASP ZAP<br>SQLmap · Nikto · Vulnerabilidades conhecidas</div>
+    </div>
+    <div class="skill-item">
+      <div class="skill-icon">// 04</div>
+      <div class="skill-name">Análise de Rede</div>
+      <div class="skill-tools">Wireshark · tcpdump<br>Nmap · Netcat</div>
+    </div>
+    <div class="skill-item">
+      <div class="skill-icon">// 05</div>
+      <div class="skill-name">OSINT</div>
+      <div class="skill-tools">Maltego · Shodan<br>theHarvester · Recon-ng</div>
+    </div>
+    <div class="skill-item">
+      <div class="skill-icon">// 06</div>
+      <div class="skill-name">Scripting & Dev</div>
+      <div class="skill-tools">Python · C · Bash · PowerShell<br>automação &amp; ferramentas</div>
+    </div>
+  </div>
+</section>
+
+<!-- PROJETOS -->
+<section id="projetos">
+  <div class="section-header">
+    <span class="section-num">02.</span>
+    <h2 class="section-title">Projetos</h2>
+    <div class="section-line"></div>
+  </div>
+
+  <div class="projects-grid">
+    <div class="project-card">
+      <div class="project-tag">// offensive security tool</div>
+      <div class="project-name">Phantom</div>
+      <p class="project-desc">
+        Ferramenta de segurança ofensiva desenvolvida para operações de red team e análise de superfície de ataque. Focada em furtividade, evasão de detecção e automação de reconhecimento avançado.
+      </p>
+      <div class="project-badges">
+        <span class="badge">Python</span>
+        <span class="badge">Offensive</span>
+        <span class="badge">Red Team</span>
+        <span class="badge">Stealth</span>
+      </div>
+    </div>
+
+    <div class="project-card">
+      <div class="project-tag">// offensive security tool</div>
+      <div class="project-name">Metatron</div>
+      <p class="project-desc">
+        Framework ofensivo desenvolvido para automação de ataques e análise de vulnerabilidades em ambientes controlados. Arquitetura modular com suporte a múltiplos vetores de exploração.
+      </p>
+      <div class="project-badges">
+        <span class="badge">Python</span>
+        <span class="badge">Framework</span>
+        <span class="badge">Exploit</span>
+        <span class="badge">Modular</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- EXPERIÊNCIA -->
+<section id="experiencia">
+  <div class="section-header">
+    <span class="section-num">03.</span>
+    <h2 class="section-title">Experiência & Formação</h2>
+    <div class="section-line"></div>
+  </div>
+
+  <div class="exp-item">
+    <div class="exp-year">Hacking</div>
+    <div>
+      <div class="exp-role">Ethical Hacker & Security Researcher</div>
+      <div class="exp-org">independente</div>
+      <p class="exp-desc">Pesquisa contínua em segurança ofensiva, desenvolvimento de ferramentas, participação em CTFs e análise de vulnerabilidades em ambientes controlados.</p>
+    </div>
+  </div>
+
+  <div class="exp-item">
+    <div class="exp-year">formação</div>
+    <div>
+      <div class="exp-role">Cisco Certified</div>
+      <div class="exp-org">Cisco Networking Academy</div>
+      <p class="exp-desc">Certificação em infraestrutura de redes e segurança, com ênfase em protocolos, topologias e configuração de ambientes seguros.</p>
+    </div>
+  </div>
+
+  <div class="exp-item">
+    <div class="exp-year">ativo</div>
+    <div>
+      <div class="exp-role">CTF Player</div>
+      <div class="exp-org">competições internacionais</div>
+      <p class="exp-desc">Participação regular em competições de Capture The Flag, resolvendo desafios de web exploitation, reverse engineering, criptografia e forense digital.</p>
+    </div>
+  </div>
+  
+  <div class="exp-item">
+    <div class="exp-year">TryHackme</div>
+    <div>
+      <div class="exp-role">Plataforma</div>
+      <div class="exp-org">competições e desafios solo</div>
+      <p class="exp-desc">Aqui foi onde aprimorei habilidades, desenvolvi meu raciocínio como pentester e fui capaz de resolver alguns desafios reais</p>
+    </div>
+  </div>
+
+</section>
+
+<!-- CONTATO -->
+<section id="contato">
+  <div class="section-header">
+    <span class="section-num">04.</span>
+    <h2 class="section-title">Contato</h2>
+    <div class="section-line"></div>
+  </div>
+
+  <a href="https://github.com/nanxsec" target="_blank" class="contact-row">
+    <span class="contact-label">github</span>
+    <span class="contact-value">github.com/nanxsec</span>
+    <span class="contact-arrow">→</span>
+  </a>
+
+  <a href="https://github.com/nanxsec" target="_blank" class="contact-row">
+    <span class="contact-label">Instagram</span>
+    <span class="contact-value">https://www.instagram.com/eulucas.97/</span>
+    <span class="contact-arrow">→</span>
+  </a>
+
+</section>
+
+<footer>
+  <div>lucas silva · ethical hacker · nanxsec · 2026</div>
+  <div style="margin-top:8px; color: #2d3748;">// stay curious. hack responsibly.</div>
+</footer>
+
+</body>
+</html>
